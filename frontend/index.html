@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VocraAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@300;400;500&family=Noto+Sans+Tamil:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0b; --surface: #111113; --surface2: #18181c;
+      --border: #222228; --border2: #2e2e38;
+      --accent: #c8a96e; --accent2: #e8c98e;
+      --accent-dim: rgba(200,169,110,0.12); --accent-glow: rgba(200,169,110,0.06);
+      --text: #e8e6e0; --text2: #9a9890; --text3: #5a5856;
+      --red: #c06060; --green: #6a9e78; --blue: #6888b8;
+    }
+    html, body { height: 100%; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    #root { min-height: 100vh; display: flex; flex-direction: column; }
+    .tamil-script { font-family: 'Noto Sans Tamil', sans-serif; }
+    header { border-bottom: 1px solid var(--border); padding: 0 48px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: rgba(10,10,11,0.92); backdrop-filter: blur(12px); z-index: 100; }
+    .logo { display: flex; align-items: baseline; gap: 12px; }
+    .logo-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; letter-spacing: 0.02em; color: var(--accent); }
+    .logo-tamil { font-family: 'Noto Sans Tamil', sans-serif; font-size: 13px; color: var(--text3); font-weight: 300; }
+    .header-tag { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); font-weight: 400; }
+    .hero-eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-weight: 400; margin-bottom: 20px; }
+    .hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(40px,6vw,72px); font-weight: 300; line-height: 1.1; letter-spacing: -0.01em; color: var(--text); margin-bottom: 8px; }
+    .hero-title em { font-style: italic; color: var(--accent); }
+    .hero-tamil-line { font-family: 'Noto Sans Tamil', sans-serif; font-size: clamp(18px,2.5vw,28px); color: var(--text3); font-weight: 300; margin-bottom: 24px; letter-spacing: 0.04em; }
+    .hero-desc { max-width: 560px; color: var(--text2); font-size: 15px; line-height: 1.8; font-weight: 300; }
+    .hero-stats { display: flex; gap: 48px; margin-top: 40px; }
+    .stat { display: flex; flex-direction: column; gap: 4px; }
+    .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; color: var(--accent); line-height: 1; }
+    .stat-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); }
+    .main-layout { display: grid; grid-template-columns: 220px 1fr; flex: 1; min-height: 0; }
+    .sidebar { border-right: 1px solid var(--border); padding: 32px 0; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }
+    .sidebar-section-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text3); padding: 0 24px; margin-bottom: 8px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 24px; cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; color: var(--text2); font-size: 13px; font-weight: 400; user-select: none; }
+    .nav-item:hover { color: var(--text); background: var(--accent-glow); }
+    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-dim); }
+    .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.6; flex-shrink: 0; }
+    .sidebar-divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .content { padding: 40px 48px; max-width: 900px; }
+    .section-header { margin-bottom: 28px; }
+    .section-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; color: var(--text); margin-bottom: 6px; }
+    .section-subtitle { font-size: 13px; color: var(--text3); font-weight: 300; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; margin-bottom: 20px; }
+    .card-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
+    .lang-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; margin-bottom: 16px; }
+    select, textarea, input { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); border-radius: 3px; font-family: 'Inter', sans-serif; font-size: 13px; outline: none; transition: border-color 0.15s; }
+    select:focus, textarea:focus, input:focus { border-color: var(--accent); }
+    select { padding: 8px 12px; width: 100%; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a5856'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+    textarea { width: 100%; padding: 14px; resize: vertical; min-height: 120px; line-height: 1.7; }
+    .swap-btn { background: var(--surface2); border: 1px solid var(--border2); color: var(--text3); width: 36px; height: 36px; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.15s; flex-shrink: 0; }
+    .swap-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .btn { background: var(--accent); color: #0a0a0b; border: none; border-radius: 3px; padding: 10px 24px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; letter-spacing: 0.02em; transition: all 0.15s; }
+    .btn:hover { background: var(--accent2); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-ghost { background: transparent; border: 1px solid var(--border2); color: var(--text2); border-radius: 3px; padding: 8px 16px; font-family: 'Inter', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .result-box { background: var(--surface2); border: 1px solid var(--border2); border-radius: 3px; padding: 16px; margin-top: 16px; min-height: 80px; }
+    .result-text { font-size: 15px; line-height: 1.8; color: var(--text); }
+    .result-text.tamil { font-family: 'Noto Sans Tamil', sans-serif; font-size: 16px; }
+    .result-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .result-lang-badge { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); background: var(--surface); border: 1px solid var(--border); border-radius: 2px; padding: 3px 8px; }
+    .task-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 20px; }
+    .task-card { background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; padding: 16px; cursor: pointer; transition: all 0.15s; }
+    .task-card:hover, .task-card.selected { border-color: var(--accent); background: var(--accent-dim); }
+    .task-card-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+    .task-card-desc { font-size: 11px; color: var(--text3); line-height: 1.5; }
+    .analysis-result { background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; padding: 20px; margin-top: 16px; }
+    .analysis-field { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .analysis-field:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .analysis-key { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+    .analysis-val { font-size: 14px; color: var(--text); line-height: 1.7; }
+    .analysis-val.tamil { font-family: 'Noto Sans Tamil', sans-serif; font-size: 15px; }
+    .sentiment-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 2px; font-size: 13px; font-weight: 500; letter-spacing: 0.04em; }
+    .sentiment-positive { background: rgba(106,158,120,0.15); color: var(--green); border: 1px solid rgba(106,158,120,0.3); }
+    .sentiment-negative { background: rgba(192,96,96,0.15); color: var(--red); border: 1px solid rgba(192,96,96,0.3); }
+    .sentiment-neutral { background: rgba(104,136,184,0.15); color: var(--blue); border: 1px solid rgba(104,136,184,0.3); }
+    .confidence-bar { height: 3px; background: var(--border2); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+    .confidence-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s ease; }
+    .detect-result { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 3px; margin-top: 12px; }
+    .detect-lang { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: var(--accent); }
+    .detect-code { font-size: 11px; letter-spacing: 0.1em; color: var(--text3); }
+    .loading-line { display: flex; align-items: center; gap: 10px; color: var(--text3); font-size: 13px; padding: 20px 0; }
+    .spinner { width: 14px; height: 14px; border: 1.5px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-line { color: var(--red); font-size: 13px; padding: 12px 0; display: flex; align-items: center; gap: 8px; }
+    .key-points-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .key-points-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text2); }
+    .key-points-list li::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); margin-top: 7px; flex-shrink: 0; }
+    .about-block { max-width: 640px; }
+    .about-block p { color: var(--text2); font-size: 14px; line-height: 1.9; font-weight: 300; margin-bottom: 20px; }
+    .about-block p strong { color: var(--accent); font-weight: 500; }
+    .tech-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-top: 24px; }
+    .tech-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 12px 14px; }
+    .tech-item-name { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+    .tech-item-role { font-size: 11px; color: var(--text3); }
+    .row-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+    @media (max-width: 768px) {
+      header { padding: 0 20px; }
+      .hero-stats { gap: 24px; flex-wrap: wrap; }
+      .main-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .content { padding: 24px 20px; }
+      .task-grid { grid-template-columns: 1fr; }
+      .tech-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+const API = "http://localhost:8000";
+const LANGUAGES = { en: "English", ta: "Tamil" };
+const TASKS = [
+  { id: "sentiment", title: "Sentiment Analysis", desc: "Detect emotional tone with cultural nuance" },
+  { id: "linguistic", title: "Linguistic Analysis", desc: "Morphology, etymology, and script features" },
+  { id: "summarize", title: "Summarization", desc: "Condense text in Tamil and English" },
+  { id: "transliterate", title: "Transliteration", desc: "Convert between Tamil script and Roman" },
+];
+
+function Loading({ text = "Processing" }) {
+  return <div className="loading-line"><div className="spinner" />{text}</div>;
+}
+function ErrorLine({ msg }) {
+  return <div className="error-line">Error: {msg}</div>;
+}
+
+function TranslatePage() {
+  const [src, setSrc] = useState("en");
+  const [tgt, setTgt] = useState("ta");
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const swap = () => { setSrc(tgt); setTgt(src); setResult(null); };
+
+  const run = async () => {
+    if (!input.trim()) return;
+    setLoading(true); setError(null); setResult(null);
+    try {
+      const res = await fetch(`${API}/translate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: input, source_lang: src, target_lang: tgt }),
+      });
+      if (!res.ok) throw new Error((await res.json()).detail);
+      setResult(await res.json());
+    } catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div>
+      <div className="section-header">
+        <div className="section-title">Translation</div>
+        <div className="section-subtitle">English to Tamil and Tamil to English, powered by Llama 3.3 via Groq</div>
+      </div>
+      <div className="card">
+        <div className="card-label">Language Pair</div>
+        <div className="lang-row">
+          <select value={src} onChange={e => setSrc(e.target.value)}>
+            {Object.entries(LANGUAGES).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+          <button className="swap-btn" onClick={swap} title="Swap">⇄</button>
+          <select value={tgt} onChange={e => setTgt(e.target.value)}>
+            {Object.entries(LANGUAGES).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
+        <div className="card-label">Input Text</div>
+        <textarea
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          placeholder={src === "ta" ? "தமிழில் உள்ளிடவும்..." : "Type in English..."}
+          className={src === "ta" ? "tamil-script" : ""}
+          onKeyDown={e => { if (e.key === "Enter" && e.metaKey) run(); }}
+        />
+        <div className="row-actions">
+          <span style={{fontSize:11, color:"var(--text3)"}}>⌘↵ to translate</span>
+          <button className="btn" onClick={run} disabled={loading || !input.trim()}>
+            {loading ? "Translating..." : "Translate"}
+          </button>
+        </div>
+        {loading && <Loading text="Translating with Llama 3.3" />}
+        {error && <ErrorLine msg={error} />}
+        {result && (
+          <div className="result-box">
+            <div className={`result-text ${tgt === "ta" ? "tamil" : ""}`}>{result.translated}</div>
+            <div className="result-meta">
+              <span className="result-lang-badge">{result.source} → {result.target}</span>
+              <button className="btn-ghost" onClick={() => navigator.clipboard.writeText(result.translated)}>Copy</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AnalyzePage() {
+  const [task, setTask] = useState("sentiment");
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const run = async () => {
+    if (!input.trim()) return;
+    setLoading(true); setError(null); setResult(null);
+    try {
+      const res = await fetch(`${API}/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: input, task }),
+      });
+      if (!res.ok) throw new Error((await res.json()).detail);
+      setResult(await res.json());
+    } catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  };
+
+  const renderResult = () => {
+    if (!result) return null;
+    const r = result.result;
+    if (result.task === "sentiment") return (
+      <div className="analysis-result">
+        <div className="analysis-field">
+          <div className="analysis-key">Sentiment</div>
+          <div className={`sentiment-badge sentiment-${r.sentiment}`}>{r.sentiment?.toUpperCase()}</div>
+          <div className="confidence-bar"><div className="confidence-fill" style={{width:`${(r.confidence||0)*100}%`}} /></div>
+          <div style={{fontSize:11,color:"var(--text3)",marginTop:4}}>{Math.round((r.confidence||0)*100)}% confidence</div>
+        </div>
+        {r.explanation && <div className="analysis-field"><div className="analysis-key">Explanation</div><div className="analysis-val">{r.explanation}</div></div>}
+        {r.key_phrases?.length > 0 && (
+          <div className="analysis-field">
+            <div className="analysis-key">Key Phrases</div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              {r.key_phrases.map((p,i) => <span key={i} style={{background:"var(--surface)",border:"1px solid var(--border)",padding:"3px 10px",borderRadius:2,fontSize:12,color:"var(--text2)"}}>{p}</span>)}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+    if (result.task === "linguistic") return (
+      <div className="analysis-result">
+        {r.script_analysis && <div className="analysis-field"><div className="analysis-key">Script / Language</div><div className="analysis-val">{r.script_analysis}</div></div>}
+        {r.morphology && <div className="analysis-field"><div className="analysis-key">Morphological Features</div><div className="analysis-val">{r.morphology}</div></div>}
+        {r.etymology && <div className="analysis-field"><div className="analysis-key">Etymology</div><div className="analysis-val">{r.etymology}</div></div>}
+        {r.complexity_score && <div className="analysis-field"><div className="analysis-key">Linguistic Complexity</div><div className="analysis-val">{r.complexity_score} / 10</div><div className="confidence-bar"><div className="confidence-fill" style={{width:`${r.complexity_score*10}%`}} /></div></div>}
+        {r.fun_fact && <div className="analysis-field"><div className="analysis-key">Tamil Fact</div><div className="analysis-val" style={{fontStyle:"italic",color:"var(--accent)"}}>{r.fun_fact}</div></div>}
+      </div>
+    );
+    if (result.task === "summarize") return (
+      <div className="analysis-result">
+        {r.summary_english && <div className="analysis-field"><div className="analysis-key">Summary (English)</div><div className="analysis-val">{r.summary_english}</div></div>}
+        {r.summary_original && <div className="analysis-field"><div className="analysis-key">Summary (Original)</div><div className={`analysis-val ${r.summary_original.match(/[\u0B80-\u0BFF]/) ? "tamil" : ""}`}>{r.summary_original}</div></div>}
+        {r.key_points?.length > 0 && <div className="analysis-field"><div className="analysis-key">Key Points</div><ul className="key-points-list">{r.key_points.map((pt,i) => <li key={i}>{pt}</li>)}</ul></div>}
+        {r.word_count && <div className="analysis-field"><div className="analysis-key">Word Count</div><div className="analysis-val">{r.word_count} words</div></div>}
+      </div>
+    );
+    if (result.task === "transliterate") return (
+      <div className="analysis-result">
+        {r.script_direction && <div className="analysis-field"><div className="analysis-key">Direction</div><div className="analysis-val">{r.script_direction}</div></div>}
+        {r.transliterated && <div className="analysis-field"><div className="analysis-key">Transliterated</div><div className={`analysis-val ${r.transliterated.match(/[\u0B80-\u0BFF]/) ? "tamil" : ""}`} style={{fontSize:18}}>{r.transliterated}</div></div>}
+        {r.pronunciation_guide && <div className="analysis-field"><div className="analysis-key">Pronunciation Guide</div><div className="analysis-val">{r.pronunciation_guide}</div></div>}
+      </div>
+    );
+    return <div className="analysis-result"><pre style={{fontSize:12,color:"var(--text2)",whiteSpace:"pre-wrap"}}>{JSON.stringify(r,null,2)}</pre></div>;
+  };
+
+  return (
+    <div>
+      <div className="section-header">
+        <div className="section-title">Linguistic Analysis</div>
+        <div className="section-subtitle">Deep NLP analysis powered by Llama 3.3 via Groq</div>
+      </div>
+      <div className="task-grid">
+        {TASKS.map(t => (
+          <div key={t.id} className={`task-card ${task===t.id?"selected":""}`} onClick={() => { setTask(t.id); setResult(null); }}>
+            <div className="task-card-title">{t.title}</div>
+            <div className="task-card-desc">{t.desc}</div>
+          </div>
+        ))}
+      </div>
+      <div className="card">
+        <div className="card-label">Input Text — Tamil or English</div>
+        <textarea value={input} onChange={e => setInput(e.target.value)} placeholder="தமிழ் உரையை இங்கே உள்ளிடவும் அல்லது type in English..." style={{minHeight:140}} />
+        <div className="row-actions">
+          <span style={{fontSize:11,color:"var(--text3)"}}>Task: {TASKS.find(t=>t.id===task)?.title}</span>
+          <button className="btn" onClick={run} disabled={loading||!input.trim()}>{loading?"Analyzing...":"Analyze"}</button>
+        </div>
+        {loading && <Loading text="Running analysis with Llama 3.3" />}
+        {error && <ErrorLine msg={error} />}
+        {renderResult()}
+      </div>
+    </div>
+  );
+}
+
+function DetectPage() {
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const run = async () => {
+    if (!input.trim()) return;
+    setLoading(true); setError(null); setResult(null);
+    try {
+      const res = await fetch(`${API}/detect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: input }),
+      });
+      if (!res.ok) throw new Error((await res.json()).detail);
+      setResult(await res.json());
+    } catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div>
+      <div className="section-header">
+        <div className="section-title">Language Detection</div>
+        <div className="section-subtitle">Identify the language of any text input automatically</div>
+      </div>
+      <div className="card">
+        <div className="card-label">Input Text</div>
+        <textarea value={input} onChange={e => setInput(e.target.value)} placeholder="Paste any text — Tamil, English, or another language..." style={{minHeight:100}} />
+        <div className="row-actions">
+          <span />
+          <button className="btn" onClick={run} disabled={loading||!input.trim()}>{loading?"Detecting...":"Detect Language"}</button>
+        </div>
+        {loading && <Loading text="Detecting language" />}
+        {error && <ErrorLine msg={error} />}
+        {result && (
+          <div className="detect-result">
+            <div className="detect-lang">{result.language_name}</div>
+            <div>
+              <div style={{fontSize:13,color:"var(--text2)",marginBottom:2}}>{result.language_name} detected</div>
+              <div className="detect-code">ISO code: {result.detected}</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AboutPage() {
+  return (
+    <div>
+      <div className="section-header">
+        <div className="section-title">About VocraAI</div>
+        <div className="section-subtitle">A computational linguistics toolkit for one of humanity's oldest living languages</div>
+      </div>
+      <div className="about-block">
+        <p>
+          Tamil is one of the world's oldest living classical languages, with a literary tradition spanning over <strong>2,500 years</strong>. Despite its antiquity and the 80 million people who speak it globally, Tamil remains significantly underrepresented in modern natural language processing systems.
+        </p>
+        <p>
+          VocraAI is built to close that gap. Translation, sentiment analysis, morphological study, summarization, and transliteration — all powered by <strong>Llama 3.3 70B</strong> via Groq, with prompting tuned specifically for Tamil's agglutinative structure and Dravidian linguistic heritage.
+        </p>
+        <p>
+          VocraAI was built for <strong>LingHacks VII</strong>, the world's first computational linguistics hackathon for high schoolers, as a demonstration of what accessible NLP tooling can look like for historically underserved languages.
+        </p>
+        <div style={{fontSize:10,letterSpacing:"0.14em",textTransform:"uppercase",color:"var(--text3)",marginBottom:12,marginTop:8}}>Technology Stack</div>
+        <div className="tech-grid">
+          {[
+            ["Llama 3.3 70B", "Translation + NLP"],
+            ["Groq", "LLM inference"],
+            ["FastAPI", "Backend API"],
+            ["React", "Frontend UI"],
+          ].map(([name,role]) => (
+            <div className="tech-item" key={name}>
+              <div className="tech-item-name">{name}</div>
+              <div className="tech-item-role">{role}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const PAGES = [
+  { id: "translate", label: "Translation" },
+  { id: "analyze", label: "Linguistic Analysis" },
+  { id: "detect", label: "Language Detection" },
+  { id: "about", label: "About" },
+];
+
+function App() {
+  const [page, setPage] = useState("translate");
+  return (
+    <div id="root-inner">
+      <header>
+        <div className="logo">
+          <span className="logo-name">VocraAI</span>
+          <span className="logo-tamil">வோக்ரா</span>
+        </div>
+        <span className="header-tag">LingHacks VII</span>
+      </header>
+      <div style={{borderBottom:"1px solid var(--border)",background:"radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200,169,110,0.04) 0%, transparent 70%)"}}>
+        <div style={{padding:"64px 48px 52px",maxWidth:900}}>
+          <div className="hero-eyebrow">World's Oldest Living Classical Language</div>
+          <h1 className="hero-title">NLP tools for <em>Tamil</em></h1>
+          <div className="hero-tamil-line">தமிழ் — 2,500 ஆண்டுகளுக்கும் மேலான இலக்கிய மரபு</div>
+          <p className="hero-desc">Translation, sentiment analysis, morphological study, and transliteration for one of humanity's most ancient and underserved languages in modern NLP.</p>
+          <div className="hero-stats">
+            <div className="stat"><div className="stat-num">2,500+</div><div className="stat-label">Years of literary tradition</div></div>
+            <div className="stat"><div className="stat-num">80M</div><div className="stat-label">Global speakers</div></div>
+            <div className="stat"><div className="stat-num">5</div><div className="stat-label">NLP tools</div></div>
+          </div>
+        </div>
+      </div>
+      <div className="main-layout">
+        <nav className="sidebar">
+          <div className="sidebar-section-label">Tools</div>
+          {PAGES.map(p => (
+            <div key={p.id} className={`nav-item ${page===p.id?"active":""}`} onClick={() => setPage(p.id)}>
+              <div className="nav-dot" />{p.label}
+            </div>
+          ))}
+          <div className="sidebar-divider" />
+          <div style={{padding:"0 24px"}}>
+            <div style={{fontSize:11,color:"var(--text3)",lineHeight:1.7}}>
+              VocraAI — powered by Llama 3.3 via Groq. Built for LingHacks VII.
+            </div>
+          </div>
+        </nav>
+        <main className="content">
+          {page === "translate" && <TranslatePage />}
+          {page === "analyze" && <AnalyzePage />}
+          {page === "detect" && <DetectPage />}
+          {page === "about" && <AboutPage />}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById("root"));
+</script>
+</body>
+</html>
