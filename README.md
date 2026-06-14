@@ -1,4 +1,4 @@
-# TamilBridge — தமிழ் பாலம்
+# VocraAI — வோக்ரா
 
 **NLP tooling for one of humanity's oldest living languages.**
 
@@ -6,15 +6,15 @@ Tamil is not merely old — it is ancient in a way almost no living language can
 
 Yet Tamil, like virtually all Dravidian languages, is dramatically underrepresented in modern NLP systems. Most large language models are trained predominantly on English and a handful of European languages. Tamil speakers have had limited access to high-quality machine translation, sentiment analysis, and linguistic tooling in their own language.
 
-TamilBridge is built to change that.
+VocraAI is built to change that.
 
 ---
 
 ## What it does
 
-**Translation** — High-quality neural machine translation between Tamil and 200+ other languages using Meta's NLLB-200 (No Language Left Behind) model, a system specifically designed to address low-resource language translation.
+**Translation** — English to Tamil and Tamil to English, powered by Llama 3.3 70B via Groq with prompting tuned specifically for Tamil script output.
 
-**Sentiment Analysis** — Detect emotional tone in Tamil text with cultural nuance, backed by Llama 3.3 70B. Outputs sentiment label, confidence score, key phrases, and a linguistically-aware explanation.
+**Sentiment Analysis** — Detect emotional tone in Tamil text with cultural nuance. Outputs sentiment label, confidence score, key phrases, and a linguistically-aware explanation.
 
 **Linguistic Analysis** — Deep morphological and etymological analysis of Tamil text. Tamil is an agglutinative language with a highly regular morphological system — suffixes encode tense, mood, person, number, and case in complex but rule-governed ways. This tool surfaces those features.
 
@@ -32,12 +32,12 @@ TamilBridge is built to change that.
 frontend/index.html     React single-page app, no build step required
 backend/main.py         FastAPI REST API
 backend/requirements.txt
+backend/.env            Your Groq API key (never commit this)
 ```
 
 **Backend:**
 - FastAPI + Uvicorn
-- `facebook/nllb-200-distilled-600M` via HuggingFace Transformers (runs locally, no API cost)
-- Groq API with `llama-3.3-70b-versatile` for analysis tasks
+- Groq API with `llama-3.3-70b-versatile` for all NLP tasks including translation
 - `langdetect` for language identification
 
 **Frontend:**
@@ -56,19 +56,19 @@ cd backend
 pip install -r requirements.txt
 ```
 
-Add your Groq API key in `main.py`:
+Create a `.env` file inside `backend/`:
 
-```python
-GROQ_API_KEY = "your_groq_api_key_here"
 ```
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+Get your free API key at https://console.groq.com
 
 Start the server:
 
 ```bash
 uvicorn main:app --reload --port 8000
 ```
-
-The NLLB-200 model (~2.4GB) will download automatically on first run.
 
 ### Frontend
 
@@ -87,10 +87,10 @@ Then open `http://localhost:3000`.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/translate` | Translate text between supported languages |
+| POST | `/translate` | Translate between English and Tamil |
 | POST | `/analyze` | Run linguistic analysis (sentiment, morphology, summarize, transliterate) |
 | POST | `/detect` | Detect language of input text |
-| GET | `/languages` | List all supported languages |
+| GET | `/languages` | List supported languages |
 
 ### Example: Translate to Tamil
 
@@ -112,7 +112,7 @@ curl -X POST http://localhost:8000/analyze \
 
 ## Supported Languages
 
-Tamil (ta), English (en), Hindi (hi), Malayalam (ml), Telugu (te), Kannada (kn), French (fr), German (de), Spanish (es), Arabic (ar), Chinese (zh-cn), and 190+ more via NLLB-200.
+English (en) and Tamil (ta) — bidirectional translation and full NLP analysis.
 
 ---
 
@@ -120,7 +120,7 @@ Tamil (ta), English (en), Hindi (hi), Malayalam (ml), Telugu (te), Kannada (kn),
 
 Of the world's 7,000+ languages, fewer than 100 have meaningful NLP tooling. Tamil sits in a peculiar position — large enough in speaker count to deserve attention, classical enough to carry profound cultural weight, yet consistently left behind by the English-first paradigm of most AI research.
 
-The word for "language" in Tamil is மொழி (mozhi). The word for "bridge" — what TamilBridge aspires to be — is பாலம் (palam).
+The word for "voice" in Tamil is குரல் (kural). VocraAI takes its name from "vox" (Latin: voice) and "AI" — a voice for Tamil in the age of artificial intelligence.
 
 ---
 
