@@ -29,10 +29,10 @@ VocraAI is built to change that.
 ## Architecture
 
 ```
-frontend/index.html     React single-page app, no build step required
-backend/main.py         FastAPI REST API
+frontend/index.html   
+backend/main.py       
 backend/requirements.txt
-backend/.env            Your Groq API key (never commit this)
+backend/.env         
 ```
 
 **Backend:**
