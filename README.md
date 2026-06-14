@@ -1,4 +1,4 @@
-# VocraAI — வோக்ரா
+# VocraAI — வோக்ரா ஏஐ
 
 **NLP tooling for one of humanity's oldest living languages.**
 
